@@ -1,0 +1,79 @@
+
+module relation
+
+{- 
+   Axioms from Boolean Algebra
+-}
+
+DEF subrel (Ord (Rel (TVar b) (TVar a))); 
+
+EQUIV meet_assoc 
+      (MEET (MEET (Var r) (Var s)) (Var t))
+      (MEET (Var r) (MEET (Var s) (Var t)));
+
+EQUIV meet_comut 
+      (MEET (Var r) (Var s)) 
+      (MEET (Var s) (Var r));
+
+EQUIV meet_absor 
+      (MEET (Var r) (JOIN (Var r) (Var s)))
+      (Var r);
+
+EQUIV meet_distr
+      (MEET (Var r) (JOIN (Var s) (Var t)))
+      (JOIN (MEET (Var r) (Var s)) (MEET (Var r) (Var t)));
+
+EQUIV meet_compl 
+      (MEET (Var r) (NEG ((Var r)))) 
+      BOT;
+
+EQUIV join_assoc 
+      (JOIN (JOIN (Var r) (Var s)) (Var t))
+      (JOIN (Var r) (JOIN (Var s) (Var t)));
+
+EQUIV join_comut
+      (JOIN (Var r) (Var s))
+      (JOIN (Var s) (Var r));
+
+EQUIV join_absor
+      (JOIN (Var r) (MEET (Var r) (Var s)))
+      (Var r);
+
+EQUIV join_distr
+      (JOIN (Var r) (MEET (Var s) (Var t)))
+      (MEET (JOIN (Var r) (Var s)) (JOIN (Var r) (Var t)));
+
+EQUIV join_compl 
+      (JOIN (Var r) (NEG (Var r))) 
+      TOP;
+
+{-
+  Other axioms
+-}
+EQUIV left_unit 
+      (COMP ID (Var r)) 
+      (Var r);
+
+EQUIV right_unit 
+      (COMP (Var r) ID) 
+      (Var r);
+
+EQUIV comp_assoc 
+      (COMP (COMP (Var r) (Var s)) (Var t))
+      (COMP (Var r) (COMP (Var s) (Var t)));
+
+EQUIV involution 
+      (CONV (CONV (Var r)))
+      (Var r);
+                 
+EQUIV contravariance 
+      (CONV (COMP (Var r) (Var s)))
+      (COMP (CONV (Var s)) (CONV (Var r)));
+
+EQUIV conv_meet 
+      (CONV (MEET (Var r) (Var s)))
+      (MEET (CONV (Var r)) (CONV (Var s)));
+
+EQUIV conv_join 
+      (CONV (JOIN (Var r) (Var r)))
+      (JOIN (CONV (Var r)) (CONV (Var r)))

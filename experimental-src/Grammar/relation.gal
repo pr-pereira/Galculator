@@ -1,0 +1,25 @@
+
+module Relation
+
+Subrel : Ord (b <-> a);
+
+Axiom Meet_assoc     := (r /\ s) /\ t = r /\ (s /\ t);
+Axiom Meet_comut     := r /\ s = s /\ r;
+Axiom Meet_absor     := r /\ (r \/ s) = r;
+Axiom Meet_distr     := r /\ (s \/ t) = (r /\ s) \/ (r /\ t);
+Axiom Meet_compl     := r /\ ~ r = Bot;
+
+Axiom Join_assoc     := (r \/ s) \/ t = r \/ (s \/ t);
+Axiom Join_comut     := r \/ s = s \/ r;
+Axiom Join_absor     := r \/ (r /\ s) = r;
+Axiom Join_distr     := r \/ (s /\ t) = (r \/ s) /\ (r \/ t);
+Axiom Join_compl     := r \/ ~ r = Top;
+
+Axiom Left_unit      := Id . r = r;
+Axiom Right_unit     := r . Id = r;
+Axiom Comp_assoc     := (r . s) . t = r . (s . t);
+Axiom Involution     := (r*)* = r;
+Axiom Contravariance := (r . s)* = s* . r*;
+Axiom Conv_meet      := (r /\ s)* = r* /\ s*;
+Axiom Conv_join      := (r \/ s)* = r* \/ s*
+

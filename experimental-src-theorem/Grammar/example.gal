@@ -1,0 +1,15 @@
+
+module MyMod 
+import QQ
+
+Axiom   a := a <=> b;
+Theorem b := a => b {
+left . indirect . qed
+};
+
+sum :: Int <- Int;
+
+Galois a := f1 f2 o1 o2;
+
+
+Strategy a := nop

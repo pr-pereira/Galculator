@@ -1,0 +1,64 @@
+
+module relator
+
+-- Composition of relators
+
+EQUIV prod_comp 
+      (COMP (PROD (Var r) (Var s)) (PROD (Var r') (Var s')))
+      (PROD (COMP (Var r) (Var r')) (COMP (Var s) (Var s')));
+
+EQUIV either_comp
+      (COMP (EITHER (Var r) (Var s)) (EITHER (Var r') (Var s')))
+      (EITHER (COMP (Var r) (Var r')) (COMP (Var s) (Var s')));
+
+EQUIV maybe_comp
+      (COMP (MAYBE (Var r)) (MAYBE (Var r')))
+      (MAYBE (COMP (Var r) (Var r')));
+
+EQUIV list_comp
+      (COMP (LIST (Var r)) (LIST (Var r')))
+      (LIST (COMP (Var r) (Var r')));
+
+EQUIV set_comp
+      (COMP (SET (Var r)) (SET (Var r')))
+      (SET (COMP (Var r) (Var r')));
+
+EQUIV map_comp
+      (COMP (MAP (Var r)) (MAP (Var r')))
+      (MAP (COMP (Var r) (Var r')));
+
+-- Identity relator
+
+EQUIV prod_id (PROD ID ID) ID;
+EQUIV either_id (EITHER ID ID) ID;
+EQUIV maybe_id (MAYBE ID) ID;
+EQUIV list_id (LIST ID) ID;
+EQUIV set_id (SET ID) ID;
+EQUIV map_id (MAP ID) ID;
+
+-- Converse distributes over relators
+
+EQUIV prod_conv 
+     (CONV (PROD (Var r) (Var s))) 
+     (PROD (CONV (Var r)) (CONV (Var s)));
+
+EQUIV either_conv 
+      (CONV (EITHER (Var r) (Var s)))
+      (EITHER (CONV (Var r)) (CONV (Var s)));
+
+EQUIV maybe_conv 
+      (CONV (MAYBE (Var r)))
+      (MAYBE (CONV (Var r)));
+
+EQUIV list_conv
+      (CONV (LIST (Var r)))
+      (LIST (CONV (Var r)));
+
+EQUIV set_conv
+      (CONV (SET (Var r)))
+      (SET (CONV (Var r)));
+
+EQUIV map_conv
+      (CONV (MAP (Var r)))
+      (MAP (CONV (Var r)))
+

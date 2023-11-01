@@ -1,0 +1,29 @@
+
+module Integer
+
+import Cast
+import Relation
+
+Sum : Int <- Int >< Int;
+Sub : Int <- Int >< Int;
+Mul : Int <- Int >< Int;
+Div : Int <- Int >< Int;
+Max : Int <- Int >< Int;
+Min : Int <- Int >< Int;
+Gcd : Int <- Int >< Int;
+Lcd : Int <- Int >< Int;
+
+Zero : Int;
+One  : Int;
+Succ : Int <- Int;
+
+Leq     : Ord Int;
+Divides : Ord Int;
+Double  : a >< a <- a;
+
+Galois Max_gc := Max Double Leq Leq;
+Galois Min_gc := Double Min Leq Leq;
+
+F1 : Int <- Int;
+
+F2 : Int <- Int

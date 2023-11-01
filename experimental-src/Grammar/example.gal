@@ -1,0 +1,15 @@
+
+module MyMod 
+import QQ
+
+Axiom   A := a = b;
+Theorem B := a = b {
+left > ind_left O > qed
+};
+
+Sum : Int <- Int;
+
+Galois A := f1 f2 o1 o2;
+
+
+Strategy A := nop

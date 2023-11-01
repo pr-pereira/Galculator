@@ -1,0 +1,24 @@
+
+module Relator
+
+Axiom Prod_comp   := r >< s . r' >< s' <=> (r . r') >< (s . s');
+Axiom Either_comp := 
+  Either r s . Either r' s' <=> Either (r . r') (s . s');
+Axiom Maybe_comp  := Maybe r . Maybe r' <=> Maybe (r . r');
+Axiom List_comp   := List r . List r' <=> List (r . r');
+Axiom Set_comp    := Set r . Set r' <=> Set (r . r');
+Axiom Map_comp    := Map r . Map r' <=> Map (r . r');
+
+Axiom Prod_id     := Id >< Id <=> Id;
+Axiom Either_id   := Either Id Id <=> Id;
+Axiom Maybe_id    := Maybe Id <=> Id;
+Axiom List_id     := List Id <=> Id;
+Axiom Set_id      := Set Id <=> Id;
+Axiom Map_id      := Map Id <=> Id;
+
+Axiom Prod_conv   := (r >< s)* <=> r* >< s*;
+Axiom Either_conv := (Either r s)* <=> Either r* s*;
+Axiom Maybe_conv  := (Maybe r)* <=> Maybe r*;
+Axiom List_conv   := (List r)* <=> List r*;
+Axiom Set_conv    := (Set r)* <=> Set r*;
+Axiom Map_conv    := (Map r)* <=> Map r*

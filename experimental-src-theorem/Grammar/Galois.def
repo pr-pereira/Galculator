@@ -1,0 +1,365 @@
+
+definition
+
+module Type
+  imports Identifier
+  exports
+    sorts Type
+    context-free syntax
+      "(" Type ")"          -> Type { bracket }
+      Variable              -> Type
+      "()"                  -> Type
+      "Bool"                -> Type
+      "Char"                -> Type
+      "String"              -> Type
+      "Int"                 -> Type
+      "Float"               -> Type
+      Type "><" Type        -> Type { right}
+      "Either" Type Type    -> Type
+      "Maybe"  Type         -> Type { right }
+      "List"   Type         -> Type { right }
+      "Set"    Type         -> Type { right }
+      "Map"    Type Type    -> Type
+      Type "<-" Type        -> Type { right }
+      Type "<->" Type       -> Type { right }
+      "Ord"    Type         -> Type
+      "GC"     Type         -> Type
+
+    context-free priorities
+      Type "><" Type -> Type >
+      Type "<-" Type -> Type
+
+module R
+  imports Type
+  imports Identifier Exclude
+  exports
+    sorts R
+    context-free syntax
+
+    "(" R ")" -> R { bracket }
+    Identifier -> R { cons("RefS") }
+    Variable -> R { cons("VarS") }
+    "Id" -> R { cons("IdS") }
+    "Top" -> R { cons("TopS") }
+    "Bot" -> R { cons("BotS") }
+    "Neg" R -> R { cons("NegS") }
+    R "*" -> R { cons("ConvS") }
+    R "/\\" R -> R {left, cons("MeetS")} 
+    R "\\/" R -> R {left, cons("JoinS")}
+    R "." R -> R {left, cons("CompS")}
+    "<" R "," R ">" -> R {cons("SplitS")}
+    R "><" R -> R {left, cons("ProdS")}
+    "Either" R R -> R {cons("EitherS")}
+    "Maybe" R -> R {cons("MaybeS")}
+    "List" R -> R {cons("ListS")}
+    "Set" R -> R {cons("SetS")}
+    "Map" R -> R {cons("MapS")}
+    R "<-" R -> R {cons("Reynolds")}
+    "Ord" R -> R {cons("OrdS")}
+    "Fun" R -> R {cons("FunS")}
+    "<" R ">" R -> R {cons("LeftsecS")}
+    R "<" R ">" -> R {cons("RightsecS")}
+    "OProd" R -> R {cons("OProdS")}
+    "Join" R -> R {cons("OJoinS")}
+    "Meet" R -> R {cons("OMeetS")}
+    R "$" R -> R { cons("ApplyS") }
+   
+    context-free priorities
+      {"<" R ">" R -> R
+       R "<" R ">" -> R } >
+      {"Fun" R -> R
+       "Ord" R -> R } >
+      R "*" -> R >
+      {R "><" R -> R
+       "Either" R R -> R
+       "Maybe" R -> R
+       "List" R -> R
+       "Set" R -> R
+       "Map" R -> R} >
+      R "." R -> R >
+      { R "/\\" R -> R
+        R "\\/" R -> R }
+
+%%      "(" R ")"                     -> R { bracket }
+%%      Function                      -> R
+%%      Order                         -> R
+%%      Relation                      -> R
+
+%%      "Max"  Order                  -> R
+%%      "Min"  Order                  -> R
+
+ %%     Function R                    -> R
+  
+%%      "(" Relation ")"              -> Relation { bracket }
+%%      Reference                     -> Relation
+%%      Variable                      -> Relation
+%%      "Id"                          -> Relation
+%%      "Bot"                         -> Relation
+%%      "Top"                         -> Relation
+%%      "Neg" Relation                -> Relation
+%%      Relation "*"                  -> Relation
+%%      Relation "/\\" Relation       -> Relation { left }
+%%      Relation "\\/" Relation       -> Relation { left }
+%%      Relation "." Relation         -> Relation { left }
+%%      "<" Relation "," Relation ">" -> Relation
+
+%%      Relation "><" Relation        -> Relation { left }
+%%      "Either"   Relation Relation  -> Relation
+%%      "Maybe"    Relation           -> Relation
+%%      "List"     Relation           -> Relation
+%%      "Set"      Relation           -> Relation
+%%      "Map"      Relation           -> Relation
+
+%%      Relation "<-" Relation        -> Relation
+
+%%      "Ord"      Order              -> Relation
+%%      "Fun"      Function           -> Relation
+
+%%      "(" Function ")"              -> Function { bracket }
+%%      Reference                     -> Function
+%%      Variable                      -> Function
+%%      "id"                          -> Function
+ %%     Function "." Function         -> Function { left }
+
+%%      "<" R ">" Function            -> Function
+%%      Function "<" R ">"            -> Function
+
+%%      "(" Order ")"                 -> Order
+%%      Reference                     -> Order
+%%      Variable                      -> Order
+%%      "id"                          -> Order
+%%      Order "." Order               -> Order { left }
+%%      Order "*"                     -> Order
+ %%     "OProd" Order                 -> Order
+
+%%      "Join" Order                  -> Function
+%%      "Meet" Order                  -> Function
+
+%%      "Galois" Identifier ":=" Function Function Order Order -> GC
+%%      "id"                                                   -> GC
+%%      GC "." GC                                              -> GC
+%%      GC "*"                                                 -> GC
+
+%%      "LAdj"    GC                 -> Function
+%%      "UAdj"    GC                 -> Function
+%%      "LOrd"    GC                 -> Order
+%%      "UOrd"    GC                 -> Order
+%%
+%%      Identifier                    -> Reference
+%%      Variable                      -> Variable
+
+ %%     "Top" -> Identifier { reject }
+
+module Galois 
+  imports Identifier R
+  exports
+    sorts GC
+    context-free syntax
+      %%"Galois" Identifier ":=" Function Function Order Order -> GC
+      "Galois" Identifier ":=" R R R R -> GC
+      Identifier -> GC
+      Variable -> GC
+
+module Definition 
+  imports Identifier
+  exports
+    sorts Definition
+    context-free syntax
+      Identifier ":" Type -> Definition
+
+module Law
+  imports R
+  imports Step
+  imports Identifier
+  exports
+    sorts Law 
+    context-free syntax
+      R "<=>" R              -> Law
+      R "=>" R               -> Law
+
+module Module
+  imports R
+  imports Law
+  imports Identifier
+  imports Definition
+  imports Galois
+  imports Whitespace Comments
+  exports
+    context-free start-symbols Module
+    sorts Module
+    context-free syntax
+      Header Body -> Module
+
+      "module" Identifier ("import" Identifier)* -> Header
+      {Axiom | Theorem | GC | Definition | Strategy ";"}* -> Body
+
+      "Axiom" Identifier ":=" Law -> Axiom
+      "Theorem" Identifier ":=" Law ("[" {Law ","}+ "]")? "{" Step "}" -> Theorem
+      "Strategy" Identifier ":=" Step -> Strategy
+    
+module Step
+  imports R
+  imports Combinator Whitespace
+  exports
+    sorts Step
+    context-free syntax
+      Combinator                  -> Step
+%%      "indirect" "up"   Order     -> Step
+%%      "indirect" "low"  Order     -> Step
+      "indirect" "up"   R     -> Step
+      "indirect" "low"  R     -> Step
+      "indirect" "end"            -> Step
+      "left"                      -> Step
+      "qed"                       -> Step
+      "right"                     -> Step
+      Step ">" Step               -> Step { left }
+
+
+module Combinator
+  imports Derivation Whitespace
+  exports
+    sorts Combinator
+    context-free syntax
+      "(" Combinator ")"                   -> Combinator { bracket }
+      "nop"                                -> Combinator
+      "fail"                               -> Combinator
+      Combinator "&"  Combinator           -> Combinator { left }
+      Combinator "|"  Combinator           -> Combinator { left }
+      Combinator "||" Combinator           -> Combinator { left }
+      "many"          Combinator           -> Combinator
+      "many1"         Combinator           -> Combinator
+      "try"           Combinator           -> Combinator
+      "once"          Combinator           -> Combinator
+      "everywhere"    Combinator           -> Combinator
+      "everywhere'"   Combinator           -> Combinator
+      "innermost"     Combinator           -> Combinator
+      "all"           Combinator           -> Combinator
+      "one"           Combinator           -> Combinator
+      Derivation                           -> Combinator
+
+module Derivation
+  imports Identifier GC R
+  exports
+    sorts Derivation
+    context-free syntax
+      "inv"             Derivation -> Derivation
+%%      "shunt"           Identifier -> Derivation
+%%      "distr_low"       Identifier -> Derivation
+%%      "distr_up"        Identifier -> Derivation
+%%      "monot_up"        Identifier -> Derivation
+%%      "monot_low"       Identifier -> Derivation
+%%      "top_preserving"  Identifier -> Derivation
+%%      "bot_preserving"  Identifier -> Derivation
+%%      "canc_up"         Identifier -> Derivation
+%%      "canc_low"        Identifier -> Derivation
+%%      "free"            Identifier -> Derivation
+%%      "apply"           Identifier -> Derivation
+      "shunt"           GC       -> Derivation
+      "distr_low"       GC       -> Derivation
+      "distr_up"        GC       -> Derivation
+      "monot_up"        GC       -> Derivation
+      "monot_low"       GC       -> Derivation
+      "top_preserving"  GC       -> Derivation
+      "bot_preserving"  GC       -> Derivation
+      "canc_up"         GC       -> Derivation
+      "canc_low"        GC       -> Derivation
+      "free"            Function -> Derivation
+      Identifier                 -> Derivation
+
+
+module Identifier
+  exports
+    sorts Identifier Variable
+
+    lexical syntax
+      [A-Z][A-Za-z\_0-9]*[\']* -> Identifier
+
+      [a-z][A-Za-z\_0-9]*[\']* -> Variable
+
+    lexical restrictions
+      Identifier -/- [A-Za-z\_0-9\']
+      Variable   -/- [A-Za-z\_0-9\']
+
+module Comments
+  imports Whitespace
+  exports
+    lexical syntax
+      "--" ~[\n]* "\n" -> LAYOUT
+      "{-" ~[\}]* "-}" -> LAYOUT %% Wrong definition
+
+module Whitespace
+  exports
+    lexical syntax 
+      [\ \t\n\r] -> LAYOUT
+
+    context-free restrictions
+      LAYOUT? -/- [\ \t\n\r]
+
+module Exclude
+  imports Whitespace Identifier
+  exports 
+    context-free syntax
+      "Top" -> Identifier { reject }
+      "Id" -> Identifier { reject }
+      "id" -> Identifier { reject }
+      "id" -> Variable { reject }
+      "Bot" -> Identifier { reject }
+      "Neg" -> Identifier { reject }
+      "Either" ->  Identifier { reject }
+      "Maybe" ->  Identifier { reject }
+      "Set" ->  Identifier { reject }
+      "List" ->  Identifier { reject }
+      "Map" ->  Identifier { reject }
+      "Ord" ->  Identifier { reject }
+      "Fun" -> Identifier { reject }
+      "OProd" ->  Identifier { reject }
+      "Join" -> Identifier { reject }
+      "Meet" ->  Identifier { reject }
+
+  restrictions
+    "Top"
+    "Id"
+    "id"
+    "Bot"
+    "Neg"
+    "Either"
+    "Maybe"
+    "Set"
+    "List"
+    "Map"
+    "Ord"
+    "Fun"
+    "OProd"
+    "Join"
+    "Meet" -/- [A-Za-z0-9]
+
+module Command
+  imports Law
+  imports Step
+  imports Derivation
+  imports Identifier
+  exports
+    sorts Command
+    context-free syntax
+      "abort"              -> Command
+      "assume"  Law        -> Command
+      "auto"               -> Command
+      "browse"  Identifier -> Command
+      Step                 -> Command
+      "define"  R          -> Command
+      "derive"  Derivation -> Command
+      "help"               -> Command
+      "hint"               -> Command
+      "info"    Identifier -> Command
+      "load"    Identifier -> Command
+      "modules"            -> Command
+      "prove"   Law        -> Command
+      "quit"               -> Command
+      "reload"             -> Command
+      "restart"            -> Command
+      "rules"              -> Command
+      "save"               -> Command
+      "show"               -> Command
+      "type"               -> Command
+      "undo"               -> Command
+      "unload"  Identifier -> Command

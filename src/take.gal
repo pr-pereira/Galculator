@@ -1,0 +1,157 @@
+module take
+
+-- There is a bug that makes type variable bound by name!
+-- We should be careful to use different variable names in different definitions
+
+---------- Integers ---------------------------------------------------------------------------
+DEF zero Int;
+DEF succ (Fun Int Int);
+DEF leq (Ord Int);
+DEF empty_list (List (TVar l));
+
+---------- Constant functions -----------------------------------------------------------------
+
+DEF const (Fun (TVar a) (Prod (TVar a) (TVar b)));
+
+EQUIV const_nat (COMP (FUN (LEFTSEC (REF const) (Var f))) (Var g))
+    (FUN (LEFTSEC (REF const) (Var f)));
+
+---------- Relations --------------------------------------------------------------------------
+
+EQUIV comp_assoc
+      (COMP (COMP (Var r) (Var s)) (Var t))
+      (COMP (Var r) (COMP (Var s) (Var t)));
+
+EQUIV prod_fusion (COMP (PROD (Var r1) (Var r2)) (PROD (Var r3) (Var r4)))
+    (PROD (COMP (Var r1) (Var r3)) (COMP (Var r2) (Var r4)));
+
+EQUIV natural_id_right (COMP (Var r) ID) (Var r);
+EQUIV natural_id_left (COMP ID (Var r)) (Var r);
+EQUIV conv_id (CONV ID) (ID);
+
+-- conv length . zero = nil
+EQUIV conv_length_zero
+    (COMP (CONV (FUN (REF length))) (FUN (LEFTSEC (REF const) (REF zero))))
+    (FUN (LEFTSEC (REF const) (REF empty_list)));
+
+
+---------- Products ---------------------------------------------------------------------------
+
+DEF pi1 (Fun (TVar t31) (Prod (TVar t31) (TVar t32)));
+DEF pi2 (Fun (TVar t34) (Prod (TVar t33) (TVar t34)));
+EQUIV prod_def (PROD (Var r1) (Var r2))
+    (SPLIT (COMP (Var r1) (FUN (REF pi1))) (COMP (Var r2) (FUN (REF pi2))));
+
+-- Pairing and Converse
+-- conv (split R S) . (split X Y) = meet (conv R . X) (conv S . Y)
+EQUIV pairing_converse 
+    (COMP (CONV (SPLIT (Var pc1) (Var pc2))) (SPLIT (Var pc3) (Var pc4)))
+    (MEET (COMP (CONV (Var pc1)) (Var pc3)) (COMP (CONV (Var pc2)) (Var pc4)));
+
+
+---------- Aux --------------------------------------------------------------------------------
+
+-- Retrieving the function embedded in a relation
+DEF to_func (Fun (Fun (TVar t20) (TVar t21)) (Rel (TVar t20) (TVar t21)));
+EQUIV to_func_cancel (FUN (APPLY (REF to_func) (Var f))) (Var f);
+EQUIV to_func_id (APPLY (REF to_func) ID) FId;
+
+-- Retrieving the order embedded in a relation
+DEF to_ord (Fun (Ord (TVar t22)) (Rel (TVar t22) (TVar t22)));
+EQUIV to_ord_cancel (ORD (APPLY (REF to_ord) (Var o))) (Var o);
+
+---------- Leq and Prefix ----------------------------------------------------------------------
+
+-- leq . 0 = 0
+EQUIV leq_zero
+    (COMP (ORD (REF leq)) (FUN (LEFTSEC (REF const) (REF zero)))) 
+    (FUN (LEFTSEC (REF const) (REF zero)));
+
+-- prefix . nil = nil
+EQUIV prefix_nil
+    (COMP (ORD (REF prefix)) (FUN (LEFTSEC (REF const) (REF empty_list)))) 
+    (FUN (LEFTSEC (REF const) (REF empty_list)));
+
+---------- Proven equivalences -----------------------------------------------------------------
+-- ((<empty_list>const) /\ (prefix . pi2)) = (<empty_list>const)
+EQUIV assert1
+    (MEET (FUN (LEFTSEC (REF const) (REF empty_list))) (COMP (ORD (REF prefix)) (FUN (REF pi2))))
+    (FUN (LEFTSEC (REF const) (REF empty_list)));
+
+-- ((length* . (leq . pi1)) /\ (<empty_list>const)) = (<empty_list>const)
+EQUIV assert2
+    (MEET (COMP (CONV (FUN (REF length))) (COMP (ORD (REF leq)) (FUN (REF pi1)))) (FUN (LEFTSEC (REF const) (REF empty_list))))
+    (FUN (LEFTSEC (REF const) (REF empty_list)));
+
+---------- Definitions for the actual proof ----------------------------------------------------
+
+DEF length (Fun Int (List (TVar t1)));
+DEF take (Fun (List (TVar t2)) (Prod Int (List (TVar t2))));
+DEF prefix (Ord (List (TVar t3)));
+DEF leq_prefix (Ord (Prod Int (List (TVar t4))));
+EQUIV leq_prefix_def (REF leq_prefix) (APPLY (REF to_ord) (PROD (ORD (REF leq)) (ORD (REF prefix))));
+
+
+DEF length_id (Fun (Prod Int (List (TVar a))) (List (TVar a)));
+
+-- take GC
+GDef take_gc
+    (APPLY (REF to_func) (SPLIT (FUN (REF length)) ID))
+    (REF take)
+    (REF leq_prefix)
+    (REF prefix);
+
+
+
+---------- Interactive proofs in Galculator ----------------------------------------------------
+{-
+prove EQUIV take_zero_id (COMP (FUN (REF take)) (PROD (FUN (LEFTSEC (REF const) (REF zero))) ID)) (FUN (LEFTSEC (REF const) (REF empty_list)))
+left
+indirect low (REF prefix)
+inv apply comp_assoc
+once inv shunt take_gc
+once apply to_func_cancel
+apply comp_assoc
+once apply leq_prefix_def
+once apply to_ord_cancel
+once apply prod_fusion
+once apply natural_id_right
+once apply prod_def
+once apply comp_assoc
+once apply const_nat
+once apply pairing_converse
+once apply conv_id
+once apply natural_id_left
+once apply leq_zero
+once apply conv_length_zero
+once apply assert1
+inv apply prefix_nil
+indirect end
+qed
+...
+-}
+
+{-
+prove EQUIV take_id_nil (COMP (FUN (REF take)) (PROD ID (FUN (LEFTSEC (REF const) (REF empty_list))))) (FUN (LEFTSEC (REF const) (REF empty_list)))
+left
+indirect low (REF prefix)
+inv apply comp_assoc
+once inv shunt take_gc
+apply comp_assoc
+once apply leq_prefix_def
+once apply to_ord_cancel
+once apply prod_fusion
+once apply natural_id_right
+once apply prod_def
+once apply comp_assoc
+once apply const_nat
+once apply to_func_cancel
+once apply pairing_converse
+once apply conv_id
+once apply natural_id_left
+once apply prefix_nil
+apply assert2
+inv apply prefix_nil
+indirect end
+qed
+-}

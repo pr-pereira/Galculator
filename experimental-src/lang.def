@@ -1,0 +1,197 @@
+
+definition
+
+module Type
+  imports Identifier
+  exports
+    sorts Type
+    context-free syntax
+      "TVar" Identifier   -> Type
+      "One"               -> Type
+      "Bool"              -> Type
+      "Char"              -> Type
+      "String"            -> Type
+      "Int"               -> Type
+      "Float"             -> Type
+      "Prod"   Type Type  -> Type 
+      "Either" Type Type  -> Type
+      "Maybe"  Type       -> Type
+      "List"   Type       -> Type
+      "Set"    Type       -> Type
+      "Map"    Type       -> Type
+      "Fun"    Type Type  -> Type
+      "Rel"    Type Type  -> Type
+      "Ord"    Type       -> Type
+      "GC"     Type       -> Type
+
+module R
+  imports Type
+  imports Identifier
+  exports
+    sorts R
+    context-free syntax
+      "REF" Identifier           -> R
+      "BOT"                      -> R
+      "TOP"                      -> R
+      "NEG"                      -> R
+      "MEET"     R R             -> R
+      "JOIN"     R R             -> R
+      "ID"                       -> R
+      "CONV"     R               -> R 
+      "COMP"     R R             -> R
+      "SPLIT"    R R             -> R
+      "ORD"      R               -> R
+      "FUN"      R               -> R
+      "LEFTSEC"  R R             -> R
+      "RIGHTSEC" R R             -> R
+      "APPLY"    R R             -> R
+      "DEF" Identifier R Type    -> R
+      "Var" Identifier           -> R
+      "PROD"     R R             -> R
+      "EITHER"   R R             -> R
+      "MAYBE"    R               -> R
+      "LIST"     R               -> R
+      "SET"      R               -> R
+      "MAP"      R               -> R
+      "REYNOLDS" R R             -> R
+      "FId"                      -> R
+      "FComp"    R R             -> R
+      "OId"                      -> R
+      "OComp"    R R             -> R
+      "OConv"    R               -> R
+      "OProd"    R               -> R
+      "OMeet"    R               -> R
+      "OMax"     R               -> R
+      "OMin"     R               -> R
+      "GDef" Identifier R R R R  -> R
+      "GId"                      -> R
+      "GComp"    R R             -> R
+      "GConv"    R               -> R
+      "GLAdj"    R               -> R
+      "GUAdj"    R               -> R
+      "GLOrd"    R               -> R
+      "GUOrd"    R               -> R
+
+module Law
+  imports R
+  imports Step
+  imports Identifier
+  exports
+    sorts Law Theorem
+    context-free syntax
+      "EQUIV"   Identifier R R               -> Law
+      "IMPL"    Identifier R R               -> Law
+      
+      "Theorem" Identifier "EQUIV" R R Step  -> Theorem
+      "Theorem" Identifier "IMPL"  R R Step  -> Theorem
+
+module Module
+  imports R
+  imports Law
+  imports Identifier
+  exports
+    context-free start-symbols Module
+    sorts Module
+    context-free syntax
+      "module" Identifier {Law | Theorem | R ";"}* -> Module
+
+module Step
+  imports R
+  imports Combinator
+  exports
+    sorts Step
+    context-free syntax
+      Combinator                  -> Step
+      "indirect" "up"   R         -> Step
+      "indirect" "low"  R         -> Step
+      "indirect" "end"            -> Step
+      "left"                      -> Step
+      "qed"                       -> Step
+      "right"                     -> Step
+      "seqc"            Step Step -> Step
+
+
+module Command
+  imports Law
+  imports Step
+  imports Derivation
+  imports Identifier
+  exports
+    sorts Command
+    context-free syntax
+      "abort"              -> Command
+      "assume"  Law        -> Command
+      "auto"               -> Command
+      "browse"  Identifier -> Command
+      Step                 -> Command
+      "define"  R          -> Command
+      "derive"  Derivation -> Command
+      "help"               -> Command
+      "hint"               -> Command
+      "info"    Identifier -> Command
+      "load"    Identifier -> Command
+      "modules"            -> Command
+      "prove"   Law        -> Command
+      "quit"               -> Command
+      "reload"             -> Command
+      "restart"            -> Command
+      "rules"              -> Command
+      "save"               -> Command
+      "show"               -> Command
+      "type"               -> Command
+      "undo"               -> Command
+      "unload"  Identifier -> Command
+
+module Combinator
+  imports Derivation
+  exports
+    sorts Combinator
+    context-free syntax
+      "nop"                                -> Combinator
+      "fail"                               -> Combinator
+      "seq"          Combinator Combinator -> Combinator
+      "choice"       Combinator Combinator -> Combinator
+      "lchoice"      Combinator Combinator -> Combinator
+      "many"         Combinator            -> Combinator
+      "many1"        Combinator            -> Combinator
+      "try"          Combinator            -> Combinator
+      "once"         Combinator            -> Combinator
+      "everywhere"   Combinator            -> Combinator
+      "everywhere'"  Combinator            -> Combinator
+      "innermost"    Combinator            -> Combinator
+      "all"          Combinator            -> Combinator
+      "one"          Combinator            -> Combinator
+      Derivation                           -> Combinator
+
+module Derivation
+  imports Identifier
+  exports
+    sorts Derivation
+    context-free syntax
+      "inv"             Derivation -> Derivation
+      "shunt"           Identifier -> Derivation
+      "distr_low"       Identifier -> Derivation
+      "distr_up"        Identifier -> Derivation
+      "monot_up"        Identifier -> Derivation
+      "monot_low"       Identifier -> Derivation
+      "top_preserving"  Identifier -> Derivation
+      "bot_preserving"  Identifier -> Derivation
+      "canc_up"         Identifier -> Derivation
+      "canc_low"        Identifier -> Derivation
+      "free"            Identifier -> Derivation
+      "apply"           Identifier -> Derivation
+
+
+module Identifier
+  exports
+    sorts Identifier
+
+    lexical syntax
+      [a-zA-Z\_][a-zA-Z0-9\_] -> Identifier
+
+module Layout
+  exports
+    lexical syntax
+      [\ \t\n]         -> LAYOUT
+      "--" ~[\n]* "\n" -> LAYOUT
+      "{-" ~"-}"+ "-}" -> LAYOUT

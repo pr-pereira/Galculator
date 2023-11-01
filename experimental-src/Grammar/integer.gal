@@ -1,0 +1,63 @@
+
+module Integer
+
+import Cast
+import Relation
+
+Sum : Int <- Int >< Int;
+Sub : Int <- Int >< Int;
+Mul : Int <- Int >< Int;
+Div : Int <- Int >< Int;
+Max : Int <- Int >< Int;
+Min : Int <- Int >< Int;
+Gcd : Int <- Int >< Int;
+Lcd : Int <- Int >< Int;
+
+Zero : Int;
+One'  : Int;
+Succ : Int <- Int;
+
+--Axiom One_def := One = Succ $ Zero;
+
+Leq     : Ord Int;
+Divides : Ord Int;
+Double  : a >< a <- a;
+
+{-
+Axiom Mul_assoc := Fun Mul<a> . Fun Mul<b> = Fun Mul<Mul <b> $ a>;
+
+Galois Mul_div :=
+  (Mul<a>) (Div<a>) Leq Leq;
+
+Galois Sum_sub :=
+  (Sum<a>) (Sub<a>) Leq Leq;
+
+Galois Sub_sum :=
+  (Sub<a>) (Sum<a>) Leq Leq;
+-}
+
+Galois Max_gc := Max Double Leq Leq;
+Galois Min_gc := Double Min Leq Leq;
+
+--Galois Gcd_gc := Double Gcd (OProd Divides) Divides;
+--Galois Lcm_gc := Lcm Double Divides (OProd Divides);
+
+F1 : Int <- Int;
+
+{-
+Axiom F1_def := F1 = Div<y>;
+Axiom F2_def := F2 = Sub<y>;
+
+Axiom A := Fun Div<y> = Fun Sum<One> . (Fun Div<y> . Fun Sub<y>);
+
+Theorem Div_div_shunt :=
+  Div<c> . Div<b> = Div<Mul<c> $ b>
+ {  left > indirect low Leq > once inv Fun_cast >
+    inv Comp_assoc > once inv shunt Mul_div > Comp_assoc >
+    once inv shunt Mul_div > inv Comp_assoc > 
+    once inv Contravariance > once Mul_assoc >
+    once shunt Mul_div > indirect end > qed
+  }
+-}
+
+F2 : Int <- Int

@@ -1,0 +1,17 @@
+
+module Test
+
+import Phantom1
+import Phantom2
+
+Axiom Ax1 := Id = Id;
+
+Theorem Thm1 := f . g = g 
+[f = Id]
+{Hyp1 > once Unit_comp > qed};
+
+A : Int <- Int := Id;
+
+Strategy Strat1 := ind_left O1 > nop > many (shunt G1) > all (inv R1) >
+  many (inv distr_low (G1 . G2)) > qed
+

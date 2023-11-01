@@ -1,0 +1,5 @@
+
+module cast
+
+EQUIV fun_cast (COMP (FUN (Var f)) (FUN (Var g))) (FUN (FComp (Var f) (Var g)))
+

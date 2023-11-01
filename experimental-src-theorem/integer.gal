@@ -1,0 +1,95 @@
+
+module integer
+
+DEF sum (Fun Int (Prod Int Int));
+DEF sub (Fun Int (Prod Int Int));
+DEF mul (Fun Int (Prod Int Int));
+DEF div (Fun Int (Prod Int Int));
+DEF max (Fun Int (Prod Int Int));
+DEF min (Fun Int (Prod Int Int));
+DEF gcd (Fun Int (Prod Int Int));
+DEF lcm (Fun Int (Prod Int Int));
+
+DEF zero Int;
+DEF one Int;
+DEF succ (Fun Int Int);
+
+EQUIV mul_assoc 
+  (COMP (FUN (RIGHTSEC (REF mul) (Var a))) (FUN (RIGHTSEC (REF mul) (Var b))))
+  (FUN (RIGHTSEC (REF mul) (APPLY (RIGHTSEC (REF mul) (Var b)) (Var a))));
+
+{-
+EQUIV mul_assoc 
+  (COMP (FUN (RIGHTSEC (REF mul) (Var a))) (FUN (RIGHTSEC (REF mul) (Var b))))
+  (FUN (RIGHTSEC (REF mul) (APPLY (RIGHTSEC (REF mul) (Var a)) (Var b))));
+-}
+
+DEF leq (Ord Int);
+DEF divides (Ord Int);
+DEF double (Fun (Prod (TVar a) (TVar a)) (TVar a));
+
+GDef mul_div (RIGHTSEC (REF mul) (Var a)) 
+             (RIGHTSEC (REF div) (Var a))
+             (REF leq) (REF leq);
+-- Isomorphism
+GDef sum_sub (RIGHTSEC (REF sum) (Var a))
+             (RIGHTSEC (REF sub) (Var a))
+             (REF leq) (REF leq);
+GDef sub_sum (RIGHTSEC (REF sub) (Var a))
+             (RIGHTSEC (REF sum) (Var a))
+             (REF leq) (REF leq);
+-- Dual: max/min
+GDef max_gc (REF max) (REF double) (REF leq) (OProd (REF leq));
+GDef min_gc (REF double) (REF min) (OProd (REF leq)) (REF leq);
+-- Dual: gcd/lcm
+GDef gcd_gc (REF double) (REF gcd) (OProd (REF divides)) (REF divides);
+GDef lcm_gc (REF lcm) (REF double) (REF divides) (OProd (REF divides));
+
+
+EQUIV one_def (REF one) (APPLY (REF succ) (REF zero));
+
+DEF f1 (Fun Int Int);
+EQUIV f1_def (REF f1) (RIGHTSEC (REF div) (Var y));
+
+DEF f2 (Fun Int Int);
+EQUIV f2_def (REF f2) (RIGHTSEC (REF sub) (Var y));
+
+EQUIV a (FUN (RIGHTSEC (REF div) (Var y)))
+        (COMP (FUN (RIGHTSEC (REF sum) (REF one))) (COMP (FUN (RIGHTSEC (REF div) (Var y))) (FUN (RIGHTSEC (REF sub) (Var y)))));
+
+
+
+Theorem div_div_shunt EQUIV (FComp (RIGHTSEC (REF div) (Var c)) (RIGHTSEC (REF div) (Var b))) (RIGHTSEC (REF div) (APPLY (RIGHTSEC (REF mul) (Var c)) (Var b))) seqc left seqc indirect low (REF leq) seqc once inv apply fun_cast seqc inv apply comp_assoc seqc once inv shunt mul_div seqc apply comp_assoc seqc once inv shunt mul_div seqc inv apply comp_assoc seqc once inv apply contravariance seqc once apply mul_assoc seqc once shunt mul_div seqc indirect end qed
+
+
+
+{-
+prove EQUIV canc_leq (ORD (REF leq)) (COMP (CONV (FUN (RIGHTSEC (REF sub) (Var y)))) (COMP (ORD (REF leq)) (FUN (RIGHTSEC (REF sub) (Var y))))) 
+
+prove EQUIV a (FUN (RIGHTSEC (REF div) (Var y))) (COMP (FUN (RIGHTSEC (REF sum) (REF one))) (COMP (FUN (RIGHTSEC (REF div) (Var y))) (FUN (RIGHTSEC (REF sub) (Var y)))))
+
+prove EQUIV a (COMP (FUN (RIGHTSEC (REF div) (Var c))) (FUN (RIGHTSEC (REF div) (Var b)))) (FUN (RIGHTSEC (REF div) (APPLY (RIGHTSEC (REF mul) (Var c)) (Var b))))
+
+ prove EQUIV a (FComp (RIGHTSEC (REF div) (Var c)) (RIGHTSEC (REF div) (Var b))) (RIGHTSEC (REF div) (APPLY (RIGHTSEC (REF mul) (Var c)) (Var b)))
+
+left
+indirect low (REF leq)
+once inv apply fun_cast
+inv apply comp_assoc
+once inv shunt mul_div
+apply comp_assoc
+once inv shunt mul_div
+inv apply comp_assoc
+once inv apply contravariance
+once apply mul_assoc
+once shunt mul_div
+indirect end
+qed
+
+seqc left seqc indirect low (REF leq) seqc once inv apply fun_cast seqc inv apply comp_assoc seqc once inv shunt mul_div seqc apply comp_assoc seqc once inv shunt mul_div seqc inv apply comp_assoc seqc once inv apply contravariance seqc once apply mul_assoc seqc once shunt mul_div seqc indirect end qed
+
+seq (seq (seq (seq (seq (seq (seq (seq (once inv apply fun_cast) (inv apply comp_assoc)) (once inv shunt mul_div)) (apply comp_assoc)) (once inv shunt mul_div)) (inv apply comp_assoc)) (once inv apply contravariance)) (once apply mul_assoc)) (once shunt mul_div)
+
+TODO: 
+      Para incluir comentarios no fim do ficheiro e preciso o ;
+-}

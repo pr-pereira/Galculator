@@ -1,0 +1,38 @@
+
+module TopTest
+
+import Phantom1
+import Phantom2
+
+Axiom Basic := Id = Id;
+
+Axiom Basic2 := a = Id;
+
+Axiom Basic3 := (a . b) . c = a . (b . c);
+
+Sum : Int <- Int;
+Ident : a <-> a;
+
+Galois As := Sum Id Qq Qq;
+
+Theorem Beautiful := 
+  Id . Top <= Top . Id 
+  { nop };
+
+Theorem Pure :=
+  Sum . Id = Id . Sum 
+  { nop };
+
+Strategy Ident := nop > nop;
+
+Theorem Test :=
+  f . Top = Top [f <= Id]
+  { once inv shunt Bla };
+
+Kernel : (a <-> a) <- (b <-> a)
+
+--Theorem Test2 :=
+--  f = Kernel $ (f . f)
+--  [f . f = f, Kernel $ f <= Id]
+--  { qed }
+

@@ -1,0 +1,4 @@
+
+module Cast
+
+Axiom Fun_cast := Fun f . Fun g <=> Fun (f . g)

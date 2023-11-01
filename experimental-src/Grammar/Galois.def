@@ -1,0 +1,410 @@
+
+definition
+
+module Main
+  imports Module Whitespace Comment
+  exports 
+    context-free start-symbols Module
+
+module Module
+  imports Identifier Axiom Theorem GaloisDef Definition Strategy
+  exports
+    sorts Module
+    context-free syntax
+      Header {Block ";"}* -> Module
+
+      "module" Identifier ("import" Identifier)* -> Header
+      
+      Axiom -> Block
+      Theorem -> Block
+      GaloisDef -> Block
+      Definition -> Block
+      Strategy -> Block
+
+module Type
+  imports Identifier
+  exports
+    sorts Type
+    context-free syntax
+      "(" Type ")" -> Type { bracket }
+      Variable -> Type
+      "One" -> Type
+      "Bool"                -> Type
+      "Char"                -> Type
+      "String"              -> Type
+      "Int"                 -> Type
+      "Float"               -> Type
+
+      "Maybe" Type -> Type
+      "Set" Type -> Type
+      "List" Type -> Type
+      Type "<-|" Type -> Type { right }
+      Type "><" Type -> Type { right }
+      Type "-|-" Type -> Type { right }
+      Type "<-" Type -> Type { right }
+      Type "<->" Type -> Type { right }
+      Type "~~" Type -> Type { noassoc }
+      "Ord" Type -> Type 
+      "Expr" Type -> Type
+
+    context-free priorities
+      "Maybe" Type -> Type >
+      {"Set" Type -> Type 
+       "List" Type -> Type} >
+      Type "<-|" Type -> Type >
+      {Type "><" Type -> Type
+       Type "-|-" Type -> Type} >
+      {Type "<-" Type -> Type
+       Type "<->" Type -> Type} >
+      Type "~~" Type -> Type >
+      "Ord" Type -> Type >
+      "Expr" Type -> Type
+
+module Expression
+  imports Fork Identifier Relator Interface
+  exports
+    sorts Expression
+    context-free syntax
+
+      Fork "=" Fork  -> Expression
+      Fork "<=" Fork -> Expression
+
+    
+module Fork
+  imports Identifier
+  exports
+    sorts Fork
+    context-free syntax
+      "(" Fork ")"     -> Fork { bracket }
+      Identifier       -> Fork
+      Variable         -> Fork
+
+      "Id"             -> Fork
+      "Top"            -> Fork
+      "Bot"            -> Fork
+      "~" Fork         -> Fork
+      Fork "*"         -> Fork
+      Fork "/\\" Fork  -> Fork { left }
+      Fork "\\/" Fork  -> Fork { left }
+      Fork "." Fork    -> Fork { left }
+      Fork "/*\\" Fork  -> Fork { left }
+    
+    context-free priorities
+      Fork "*" -> Fork >
+      "~" Fork -> Fork >
+      Fork "/*\\" Fork -> Fork >
+      { Fork "/\\" Fork -> Fork
+        Fork "\\/" Fork -> Fork} >
+      Fork "." Fork -> Fork
+
+module Relator
+  imports Fork
+  exports 
+    sorts Fork
+    context-free syntax
+      Fork "><" Fork -> Fork { left }
+      Fork "-|-" Fork -> Fork { left }
+      "Maybe" Fork -> Fork
+      "List" Fork -> Fork
+      "Set" Fork -> Fork
+      "Map" Fork -> Fork
+
+    context-free priorities
+      Fork "*" -> Fork >
+      {"Maybe" Fork -> Fork
+       "List" Fork -> Fork
+       "Set" Fork -> Fork
+       "Map" Fork -> Fork} >
+      {Fork "><" Fork -> Fork
+       Fork "-|-" Fork -> Fork} >
+      Fork "." Fork -> Fork
+
+       
+module Function
+  imports Identifier
+  exports
+    sorts Function
+    context-free syntax
+      "(" Function ")" -> Function { bracket }
+      Identifier -> Function
+      Variable -> Function
+
+      "Id" -> Function
+      Function "." Function -> Function { left }
+
+module Order
+  imports Identifier
+  exports
+    sorts Order
+    context-free syntax
+      "(" Order ")" -> Order { bracket }
+      Identifier -> Order
+      Variable -> Order
+ 
+      "Id" -> Order
+      Order "." Order -> Order { left }
+      Order "*" -> Order 
+    context-free priorities
+      Order "*" -> Order >
+      Order "." Order -> Order 
+  
+module Galois
+  imports Identifier 
+  exports
+    sorts Galois
+    context-free syntax
+      "(" Galois ")" -> Galois { bracket }
+      Identifier -> Galois
+      Variable -> Galois
+
+      "Id" -> Galois
+      Galois "." Galois -> Galois { left }
+      Galois "*" -> Galois
+
+    context-free priorities
+      Galois "*" -> Galois >
+      Galois "." Galois -> Galois
+
+module Interface 
+  imports Order Function
+  exports
+    sorts Fork
+    context-free syntax 
+      "Ord" Order -> Fork
+      "Fun" Function -> Fork
+
+module GaloisDef
+  imports Galois Function Order Identifier
+  exports
+    sorts GaloisDef
+    context-free syntax
+      "Galois" Identifier ":=" Function Function Order Order -> GaloisDef
+
+module Axiom
+  imports Identifier Expression
+  exports
+    sorts Axiom
+    context-free syntax
+      "Axiom" Identifier ":=" Expression -> Axiom
+
+module Theorem
+  imports Identifier Expression Step
+  exports
+    sorts Theorem
+    context-free syntax
+      "Theorem" Identifier ":=" Expression Hypothesis? Proof -> Theorem
+
+      "[" {Expression ","}+ "]" -> Hypothesis
+      "{" Step "}" -> Proof
+
+module Definition
+  imports Identifier Type Fork
+  exports
+    sorts Definition
+    context-free syntax
+      Identifier ":" Type (":=" Fork)? -> Definition
+
+module Strategy
+  imports Identifier Step
+  exports
+    sorts Strategy
+    context-free syntax
+      "Strategy" Identifier ":=" Step -> Strategy
+
+module Derivation
+  imports Identifier Galois
+  exports
+    sorts Derivation
+    context-free syntax
+      "inv" Derivation2       -> Derivation
+      Derivation2             -> Derivation
+
+      "shunt" Galois          -> Derivation2
+      "distr_low" Galois      -> Derivation2
+      "distr_up" Galois       -> Derivation2
+      "monot_up" Galois       -> Derivation2
+      "monot_low" Galois      -> Derivation2
+      "top_preserving" Galois -> Derivation2
+      "bot_preserving" Galois -> Derivation2
+      "cancel_up" Galois      -> Derivation2
+      "cancel_low" Galois     -> Derivation2
+      "free" Function         -> Derivation2
+      Identifier              -> Derivation2
+
+module Combinator
+  imports Derivation
+  exports
+    sorts Combinator
+    context-free syntax
+      "(" Combinator ")" -> Combinator { bracket }
+
+      "nop" -> Combinator
+      "fail" -> Combinator
+      Combinator "&" Combinator -> Combinator { right }
+      Combinator "|" Combinator -> Combinator { right }
+      Combinator "||" Combinator -> Combinator { right }
+      "many" Combinator -> Combinator 
+      "many1" Combinator -> Combinator
+      "try" Combinator -> Combinator
+      "once" Combinator -> Combinator
+      "top_down" Combinator -> Combinator
+      "bottom_up" Combinator -> Combinator
+      "innermost" Combinator -> Combinator
+      "all" Combinator -> Combinator
+      "one" Combinator -> Combinator
+      Derivation -> Combinator
+
+  context-free priorities
+    {"many" Combinator -> Combinator
+     "many1" Combinator -> Combinator
+     "try" Combinator -> Combinator
+     "once" Combinator -> Combinator
+     "top_down" Combinator -> Combinator
+     "bottom_up" Combinator -> Combinator
+     "innermost" Combinator -> Combinator
+     "all" Combinator -> Combinator
+     "one" Combinator -> Combinator} >
+    {Combinator "|" Combinator -> Combinator
+     Combinator "||" Combinator -> Combinator} >
+    Combinator "&" Combinator -> Combinator
+    
+module Step
+  imports Combinator
+  exports
+    sorts Step
+    context-free syntax
+      Combinator -> Step
+      "ind_left" Order -> Step
+      "ind_right" Order -> Step
+      "ind_end" -> Step
+      "left" -> Step
+      "right" -> Step
+      "qed" -> Step
+      Step ">" Step -> Step { right }
+
+module Identifier
+  exports
+    sorts Identifier Variable
+
+    lexical syntax
+      [A-Z][A-Za-z\_0-9\']* -> Identifier
+
+      [a-z][A-Za-z\_0-9\']* -> Variable
+
+    lexical restrictions
+      Identifier -/- [A-Za-z\_0-9\']
+      Variable   -/- [A-Za-z\_0-9\']
+
+    context-free syntax
+      "One" -> Identifier { reject }
+      "Bool" -> Identifier { reject }
+      "Char" -> Identifier { reject }
+      "String" -> Identifier { reject }
+      "Int" -> Identifier { reject }
+      "Float" -> Identifier { reject }
+      "Maybe" -> Identifier { reject }
+      "Set" -> Identifier { reject }
+      "List" -> Identifier { reject }
+      "Ord" -> Identifier { reject }
+      "Expr" -> Identifier { reject }
+
+      "Top" -> Identifier { reject }
+      "Bot" -> Identifier { reject }
+      "Id" -> Identifier { reject }
+      "Map" -> Identifier { reject }
+      "Ord" -> Identifier { reject }
+      "Fun" -> Identifier { reject }
+
+      "module" -> Identifier { reject }
+      "module" -> Variable { reject }
+      "import" -> Identifier { reject }
+      "import" -> Variable { reject }
+      "Axiom" -> Identifier { reject }
+      "Theorem" -> Identifier { reject }
+      "Strategy" -> Identifier { reject }
+      
+      "inv" -> Identifier { reject }
+      "inv" -> Variable { reject }
+      "shunt" -> Identifier { reject }
+      "shunt" -> Variable { reject }
+      "distr_low" -> Identifier { reject }
+      "distr_low" -> Variable { reject }
+      "distr_up" -> Identifier { reject }
+      "distr_up" -> Variable { reject }
+      "monot_up" -> Identifier { reject }
+      "monot_up" -> Variable { reject }
+      "monot_low" -> Identifier { reject }
+      "monot_low" -> Variable { reject }
+      "top_preserving" -> Identifier { reject }
+      "top_preserving" -> Variable { reject }
+      "bot_preserving" -> Identifier { reject }
+      "bot_preserving" -> Variable { reject }
+      "cancel_up" -> Identifier { reject }
+      "cancel_up" -> Variable { reject }
+      "cancel_low" -> Identifier { reject }
+      "cancel_low" -> Variable { reject }
+      "free" -> Identifier { reject }
+      "free" -> Variable { reject }
+
+      "nop"  -> Identifier { reject }
+      "nop"  -> Variable { reject }
+      "fail"  -> Identifier { reject }
+      "fail"  -> Variable { reject }
+      "many" -> Identifier { reject }
+      "many" -> Variable { reject }
+      "many1"  -> Identifier { reject }
+      "many1"  -> Variable { reject }
+      "try"  -> Identifier { reject }
+      "try"  -> Variable { reject }
+      "once"  -> Identifier { reject }
+      "once"  -> Variable { reject }
+      "top_down"  -> Identifier { reject }
+      "top_down"  -> Variable { reject }
+      "bottom_up" -> Identifier { reject }
+      "bottom_up" -> Variable { reject }
+      "innermost" -> Identifier { reject }
+      "innermost" -> Variable { reject }
+      "all" -> Identifier { reject }
+      "all" -> Variable { reject }
+      "one" -> Identifier { reject }
+      "one" -> Variable { reject }
+
+      "ind_left" -> Identifier { reject }
+      "ind_left" -> Variable { reject }
+      "ind_right" -> Identifier { reject }
+      "ind_right" -> Variable { reject }
+      "left" -> Identifier { reject }
+      "left" -> Variable { reject }
+      "right" -> Identifier { reject }
+      "right" -> Variable { reject }
+      "qed" -> Identifier { reject }
+      "qed" -> Variable { reject }
+
+    restrictions
+      "One" "Bool" "Char" "String" "Int" "Float" "Maybe" "Set"
+      "List" "Ord" "Expr" "Top" "Bot" "Id" "Map" "Ord" "Fun"
+      "module" "import" "Axiom" "Theorem" "Strategy" "inv"
+      "shunt" "distr_low" "distr_up" "monot_up" "monot_low"
+      "top_preserving" "bot_preserving" "cancel_up" "cancel_low"
+      "free" "nop" "fail" "many" "many1" "try" "once" "top_down" 
+      "bottom_up" "innermost" "all" "one" "ind_left" "ind_right"
+      "left" "right" "qed" -/- [a-zA-Z0-9\_\']
+
+module Whitespace
+  exports
+    lexical syntax 
+      [\ \t\n\r] -> LAYOUT
+
+    context-free restrictions
+      LAYOUT? -/- [\ \t\n\r]
+
+module Comment
+  exports
+    lexical syntax
+      "--" ~[\n]* "\n" -> LAYOUT
+
+      "{-" (~[\-] | Dash)* "-}" -> LAYOUT
+      [\-] -> Dash
+
+    lexical restrictions
+      Dash -/- [\}]
