@@ -1,6 +1,0 @@
-
-module galrel
-
-DEF incl (Ord (Rel (TVar a) (TVar b)));
-
-GDef conv CONV CONV (REF incl) (REF incl);

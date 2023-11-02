@@ -1,11 +1,6 @@
+module Rel
 
-module relation
-
-{- 
-   Axioms from Boolean Algebra
--}
-
-DEF subrel (Ord (Rel (TVar b) (TVar a))); 
+---------- Meet and Join  ---------------------------------------------------------------------
 
 EQUIV meet_assoc 
       (MEET (MEET (Var r) (Var s)) (Var t))
@@ -47,9 +42,8 @@ EQUIV join_compl
       (JOIN (Var r) (NEG (Var r))) 
       TOP;
 
-{-
-  Other axioms
--}
+---------- Identity ---------------------------------------------------------------------------
+
 EQUIV left_unit 
       (COMP ID (Var r)) 
       (Var r);
@@ -58,9 +52,7 @@ EQUIV right_unit
       (COMP (Var r) ID) 
       (Var r);
 
-EQUIV comp_assoc 
-      (COMP (COMP (Var r) (Var s)) (Var t))
-      (COMP (Var r) (COMP (Var s) (Var t)));
+---------- Converses --------------------------------------------------------------------------
 
 EQUIV involution 
       (CONV (CONV (Var r)))
@@ -77,3 +69,9 @@ EQUIV conv_meet
 EQUIV conv_join 
       (CONV (JOIN (Var r) (Var r)))
       (JOIN (CONV (Var r)) (CONV (Var r)));
+
+---------- Others -----------------------------------------------------------------------------
+
+EQUIV comp_assoc 
+      (COMP (COMP (Var r) (Var s)) (Var t))
+      (COMP (Var r) (COMP (Var s) (Var t)));

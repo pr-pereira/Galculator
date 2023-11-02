@@ -1,0 +1,5 @@
+module Nat
+
+DEF zero Int;
+DEF succ (Fun Int Int);
+DEF leq (Ord Int);
